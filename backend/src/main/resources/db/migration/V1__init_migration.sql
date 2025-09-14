@@ -13,19 +13,21 @@ CREATE TABLE users (
 -- Degree programs
 CREATE TABLE programs (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(10) UNIQUE NOT NULL,
+    code VARCHAR(15) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     total_units INTEGER NOT NULL,
+    total_ge_elective_units INTEGER NOT NULL,
     INDEX idx_program_code (code)
 );
 
 -- Course catalog
 CREATE TABLE courses (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(10) UNIQUE NOT NULL,
+    code VARCHAR(15) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     units INTEGER NOT NULL,
-    semester_offered ENUM('FIRST', 'SECOND', 'SUMMER') NOT NULL DEFAULT 'FIRST',
+    is_ge  BOOLEAN DEFAULT FALSE,
+    semester_offered ENUM('FIRST', 'SECOND', 'SUMMER', 'BOTH') NOT NULL DEFAULT 'FIRST',
     INDEX idx_course_code (code),
     INDEX idx_semester_offered (semester_offered)
 );
@@ -72,7 +74,7 @@ CREATE TABLE user_courses (
     semester_taken ENUM('FIRST', 'SECOND', 'SUMMER') NOT NULL DEFAULT 'FIRST',
     year_taken INTEGER NOT NULL,
     status ENUM('PASSED', 'FAILED', 'DROPPED', 'INCOMPLETE', 'IN_PROGRESS') DEFAULT 'PASSED',
-    attempt_number INTEGER NOT NULL DEFAULT 1,
+    attempt_number INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
