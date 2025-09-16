@@ -7,14 +7,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.graddaan.backend.dtos.RegisterUserDto;
 import com.graddaan.backend.dtos.UserDto;
+import com.graddaan.backend.dtos.UserProgramDto;
 import com.graddaan.backend.entities.Role;
 import com.graddaan.backend.mappers.UserMapper;
 import com.graddaan.backend.repositories.UserRepository;
+import com.graddaan.backend.services.UserProgramService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -27,6 +30,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserProgramService userProgramService;
 
     @PostMapping
     public ResponseEntity<?> registerUser(
@@ -49,5 +53,18 @@ public class UserController {
         UserDto userDto = userMapper.toDto(user);
         var uri = uriBuilder.path("/api/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);
+    }
+
+    @PostMapping("/enrollment")
+    public ResponseEntity<UserProgramDto> enrollUserInProgram(
+            @RequestParam Long userId,
+            @RequestParam Long programId,
+            UriComponentsBuilder uriBuilder
+    ) {
+
+        UserProgramDto userProgramDto = userProgramService.enrollUserInProgram(userId, programId);
+        var uri = uriBuilder.path("/api/users/{userId}/enrollment/{programId}")
+                .buildAndExpand(userProgramDto.getUserId(), userProgramDto.getProgramId()).toUri();
+        return ResponseEntity.created(uri).body(userProgramDto);
     }
 }
