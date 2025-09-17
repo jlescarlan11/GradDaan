@@ -32,32 +32,38 @@ public class UserCourse {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @Column(name = "course_id")
+    private Long courseId;
 
     @Column(name = "grade")
     private BigDecimal grade;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "semester_taken")
-    private Semester semesterTaken = Semester.FIRST;
+    private Semester semesterTaken;
 
     @Column(name = "year_taken")
     private Integer yearTaken;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private Status status = Status.PASSED;
+    private Status status;
 
     @Column(name = "attempt_number")
     private Integer attemptNumber;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "course_id", insertable = false, updatable = false)
+    private Course course;
 
 }
