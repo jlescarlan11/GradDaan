@@ -11,5 +11,7 @@ import com.graddaan.backend.entities.ProgramCourseId;
 @Repository
 public interface ProgramCourseRepository extends JpaRepository<ProgramCourse, ProgramCourseId> {
 
+    List<ProgramCourse> findByProgramIdAndIsRequired(Long programId, Boolean isRequired);
+
     List<ProgramCourse> findAllByProgramId(Long programId);
 }

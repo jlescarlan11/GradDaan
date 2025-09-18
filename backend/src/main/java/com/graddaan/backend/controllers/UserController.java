@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.graddaan.backend.dtos.CourseHistoryDto;
+import com.graddaan.backend.dtos.GraduationStatusDto;
 import com.graddaan.backend.dtos.RegisterUserDto;
 import com.graddaan.backend.dtos.UserCourseDto;
 import com.graddaan.backend.dtos.UserCourseUpdateDto;
@@ -24,9 +26,11 @@ import com.graddaan.backend.dtos.UserProgramDto;
 import com.graddaan.backend.entities.Role;
 import com.graddaan.backend.mappers.UserMapper;
 import com.graddaan.backend.repositories.UserRepository;
+import com.graddaan.backend.services.GraduationStatusService;
 import com.graddaan.backend.services.UserCourseService;
 import com.graddaan.backend.services.UserProgramService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -40,6 +44,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final UserProgramService userProgramService;
     private final UserCourseService userCourseService;
+    private final GraduationStatusService graduationStatusService;
 
     @PostMapping
     public ResponseEntity<?> registerUser(
@@ -104,4 +109,18 @@ public class UserController {
         CourseHistoryDto updatedCourse = userCourseService.updateCourseRecord(id, request);
         return ResponseEntity.ok(updatedCourse);
     }
+
+    @GetMapping("/graduation-status")
+    public ResponseEntity<GraduationStatusDto> getGraduationStatus() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var userId = (Long) authentication.getPrincipal();
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
+
+        GraduationStatusDto graduationStatus = graduationStatusService.getGraduationStatus(user);
+
+        return ResponseEntity.ok(graduationStatus);
+    }
+
 }
