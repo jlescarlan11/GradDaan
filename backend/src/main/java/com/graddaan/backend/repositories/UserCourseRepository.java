@@ -11,4 +11,6 @@ import com.graddaan.backend.entities.UserCourse;
 public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
 
     List<UserCourse> findAllByUserIdAndCourseId(Long userId, Long courseId);
+
+    List<UserCourse> findAllByUserId(Long userId);
 }

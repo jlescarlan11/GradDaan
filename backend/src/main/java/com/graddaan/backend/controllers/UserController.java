@@ -1,18 +1,24 @@
 package com.graddaan.backend.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.graddaan.backend.dtos.CourseHistoryDto;
 import com.graddaan.backend.dtos.RegisterUserDto;
 import com.graddaan.backend.dtos.UserCourseDto;
+import com.graddaan.backend.dtos.UserCourseUpdateDto;
 import com.graddaan.backend.dtos.UserDto;
 import com.graddaan.backend.dtos.UserProgramDto;
 import com.graddaan.backend.entities.Role;
@@ -38,8 +44,8 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> registerUser(
             @Valid @RequestBody RegisterUserDto request,
-            UriComponentsBuilder uriBuilder
-    ) {
+            UriComponentsBuilder uriBuilder) {
+
         if (userRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest()
                     .body(Map.of("username", "Username is already registered"));
@@ -65,8 +71,8 @@ public class UserController {
     public ResponseEntity<UserProgramDto> enrollUserInProgram(
             @RequestParam Long userId,
             @RequestParam Long programId,
-            UriComponentsBuilder uriBuilder
-    ) {
+            UriComponentsBuilder uriBuilder) {
+
         UserProgramDto userProgramDto = userProgramService.enrollUserInProgram(userId, programId);
         var uri = uriBuilder.path("/api/users/{userId}/programs/{programId}")
                 .buildAndExpand(userProgramDto.getUserId(), userProgramDto.getProgramId()).toUri();
@@ -76,11 +82,26 @@ public class UserController {
     @PostMapping("/courses")
     public ResponseEntity<UserCourseDto> addCompletedCourse(
             @Valid @RequestBody UserCourseDto request,
-            UriComponentsBuilder uriBuilder
-    ) {
+            UriComponentsBuilder uriBuilder) {
+
         UserCourseDto userCourseDto = userCourseService.addCompletedCourse(request);
         var uri = uriBuilder.path("/api/users/{userId}/courses/{courseId}")
                 .buildAndExpand(userCourseDto.getUserId(), userCourseDto.getCourseId()).toUri();
         return ResponseEntity.created(uri).body(userCourseDto);
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<List<CourseHistoryDto>> getUserCourseHistory(@RequestParam Long userId) {
+        List<CourseHistoryDto> courseHistory = userCourseService.getUserCourseHistory(userId);
+        return ResponseEntity.ok(courseHistory);
+    }
+
+    @PutMapping("/courses/{id}")
+    public ResponseEntity<CourseHistoryDto> updateCourseRecord(
+            @PathVariable Long id,
+            @Valid @RequestBody UserCourseUpdateDto request) {
+
+        CourseHistoryDto updatedCourse = userCourseService.updateCourseRecord(id, request);
+        return ResponseEntity.ok(updatedCourse);
     }
 }
